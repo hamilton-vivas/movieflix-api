@@ -31,7 +31,9 @@
         },
         "/movies/{id}": {
             "put": {
-                "tags": ["Movie"],
+                "tags": [
+                    "Movie"
+                ],
                 "summary": "Atualizar um filme existente",
                 "parameters": [
                     {
@@ -67,9 +69,11 @@
                 }
             },
             "delete": {
-              "tags": ["Movie"],
-              "summary": "Remover um filme existente",
-              "parameters": [
+                "tags": [
+                    "Movie"
+                ],
+                "summary": "Remover um filme existente",
+                "parameters": [
                     {
                         "name": "id",
                         "in": "path",
@@ -90,7 +94,43 @@
                     "500": {
                         "description": "Erro interno do servidor"
                     }
-                }  
+                }
+            }
+        },
+        "/movies/{genreName}": {
+            "get": {
+                "tags": [
+                    "Movie"
+                ],
+                "summary": "Filtrar filmes por gênero",
+                "parameters": [
+                    {
+                        "name": "genreName",
+                        "in": "path",
+                        "required": true,
+                        "description": "Nome do gênero do filme",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Movie"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Falha ao filtrar filmes por gênero"
+                    }
+                }
             }
         }
     },
