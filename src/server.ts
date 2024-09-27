@@ -68,7 +68,7 @@ app.put("/movies/:id", async (req, res) => {
     });
 
     if(!movie) {
-        return res.status(404).send({message: "Filme não encotrado"});
+        return res.status(404).send({message: "Filme não encontrado"});
     }
 
     const data = { ...req.body };
@@ -84,7 +84,7 @@ app.put("/movies/:id", async (req, res) => {
        return res.status(500).send({message: "Falha ao atualizar o registro do filme"}); 
     }
 
-    res.status(200).send();
+    res.status(200).send({message: "Filme atualizado com sucesso"});
     
 });
 
