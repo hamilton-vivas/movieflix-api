@@ -92,6 +92,10 @@ app.put("/genres/:id", async (req, res) => {
    const id = Number(req.params.id);
    const name = req.body.name;
 
+   if(!name) {
+    return res.status(400).send({ message: "O nome do gênero é obrigatório." });
+    }
+
     try {
         const genre = await prisma.genre.findUnique({
         where: { id }
