@@ -88,6 +88,43 @@ app.put("/movies/:id", async (req, res) => {
     
 });
 
+app.put("/genres/:id", async (req, res) => {
+   const id = Number(req.params.id);
+   const name = req.body.name;
+
+    try {
+        const genre = await prisma.genre.findUnique({
+        where: { id }
+    });
+
+    if(!genre) {
+        return res.status(404).send({message: "Gênero não encontrado"});
+    }
+
+    const genreWithSameName = await prisma.genre.findFirst({
+        where: {
+            name: { equals: name,
+                     mode: "insensitive"
+            }
+        }
+    });
+
+    if (genreWithSameName) {
+        return res.status(409).send({message: "Já existe um gênero cadastrado com esse nome"});
+    }
+
+    await prisma.genre.update({
+        where: { id },
+        data: { name }
+      });
+    } catch (error) {
+        return res.status(500).send({message: "Falha ao atualizar dados de gênero"});
+    }
+
+    res.status(200).send({message: "Gênero atualizado com sucesso"});
+    
+});
+
 app.delete("/movies/:id", async (req, res) => {
     const id = Number(req.params.id);
 
