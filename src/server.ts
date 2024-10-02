@@ -204,9 +204,23 @@ app.post("/genres", async (req, res) => {
             data: { name }
         });
     } catch (error) {
-        return res.status(500).send({ message: "Falha ao cadastrar um gênero" })
+        return res.status(500).send({ message: "Falha ao cadastrar um gênero" });
     }
     res.status(201).send({ message: "Gênero cadastrado com sucesso" });
+});
+
+app.get("/genres", async (_, res) => {
+    try {
+        const genres = await prisma.genre.findMany({
+            orderBy: {
+                name: "asc",
+            }
+        });
+
+        res.json(genres);
+    } catch (error) {
+        return res.status(500).send({ message: "Falha ao obter lista de gêneros" });
+    }
 });
 
 app.listen(port, () => {
