@@ -11,16 +11,41 @@ app.use(express.json());
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.get("/movies", async (_, res) => {
-    const movies = await prisma.movie.findMany({
-        orderBy: {
-            title: "asc",
-        },
-        include: {
-            genres: true,
-            languages: true,
-        },
-    });
-    res.json(movies);
+
+    try {
+        const totalMovies = await prisma.movie.count();
+
+        const averageDuration = await prisma.movie.aggregate({
+            _avg: {
+                duration: true,
+            },
+        });
+
+        const media = averageDuration._avg.duration !== null ? averageDuration._avg.duration : 0;
+
+        const movies = await prisma.movie.findMany({
+            orderBy: {
+                title: "asc",
+            },
+            include: {
+                genres: true,
+                languages: true,
+                directors: true
+            },
+        });
+
+        const result = {
+            totalMovies: totalMovies,
+            averageDuration: averageDuration._avg.duration,
+            movies: movies
+        };
+
+        res.json(result);
+    } catch (error) {
+        return res.status(500).send({ message: "Falha ao obter lista de filmes, quantidade total e média da duração dos filmes" });
+    }
+
+
 });
 
 app.post("/movies", async (req, res) => {
@@ -223,11 +248,6 @@ app.get("/genres", async (_, res) => {
     }
 });
 
-
-
-
-
-
 app.delete("/genres/:id", async (req, res) => {
     const id = Number(req.params.id);
 
@@ -248,13 +268,6 @@ app.delete("/genres/:id", async (req, res) => {
     }
     res.status(200).send({ message: "Gênero removido com sucesso" });
 });
-
-
-
-
-
-
-
 
 app.listen(port, () => {
     console.log(`Servidor em execução na porta ${port}`);
