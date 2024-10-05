@@ -10,28 +10,34 @@ const prisma = new PrismaClient();
 app.use(express.json());
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-app.get("/movies", async (_, res) => {
+app.get("/movies", async (req, res) => {
 
     try {
         const totalMovies = await prisma.movie.count();
-
         const averageDuration = await prisma.movie.aggregate({
             _avg: {
                 duration: true,
             },
         });
+        averageDuration._avg.duration !== null ? averageDuration._avg.duration : 0;
 
-        const media = averageDuration._avg.duration !== null ? averageDuration._avg.duration : 0;
+        const orderByParam = typeof req.query.sort === "string" ? req.query.sort : "title";
+        const validOrderByFields = ["title", "release_date"];
+        const orderByField = validOrderByFields.includes(orderByParam) ? orderByParam : "title";
 
+        const selectByParam = req.query.language;
+        const selectByField = selectByParam && !isNaN(Number(selectByParam)) ? Number(selectByParam) : undefined;
+        
         const movies = await prisma.movie.findMany({
             orderBy: {
-                title: "asc",
+                [orderByField]: "asc",
             },
             include: {
                 genres: true,
                 languages: true,
                 directors: true
             },
+            where: selectByField ? { language_id: selectByField } : {}
         });
 
         const result = {
@@ -44,8 +50,6 @@ app.get("/movies", async (_, res) => {
     } catch (error) {
         return res.status(500).send({ message: "Falha ao obter lista de filmes, quantidade total e média da duração dos filmes" });
     }
-
-
 });
 
 app.post("/movies", async (req, res) => {
